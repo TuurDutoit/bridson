@@ -1,0 +1,32 @@
+{
+  "name": "bridson",
+  "version": "0.0.1",
+  "description": "A javascript implementation of the Bridson algorithm for generating Poisson-disc distributions",
+  "main": "index.js",
+  "dependencies": {
+    "randf": "^1.0.0",
+    "random-int": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tuurdutoit/bridson.git"
+  },
+  "keywords": [
+    "bridson",
+    "poisson",
+    "distribution",
+    "algorithm",
+    "random",
+    "even"
+  ],
+  "author": "Tuur Dutoit <me@tuurdutoit.be>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tuurdutoit/bridson/issues"
+  },
+  "homepage": "https://github.com/tuurdutoit/bridson#readme"
+}
