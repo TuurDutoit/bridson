@@ -13,8 +13,9 @@ var size;
 var grid;
 var active;
 var inactive;
+var isInside;
 
-// Generate an array of surrounding cells to check in checkCandidate
+// Generate an array of surrounding cells to check in check
 // Check all cells in a 5x5 square, with the point in the middle
 // If point is in cell (0,0), indices go from -2 to 2 for both x and y
 // Corner cells ((-2,-2), (2,-2), ...) are omitted (they are too far away)
@@ -31,21 +32,57 @@ for(var i = -2; i <= 2; i++) {
 
 
 
-// Generate a candidate
-// distance to point at (x, y) between 'r' and r*2
-// or: r < d < r * 2
-
-var genCandidate = function(x, y) {
-  var angle = random(0, 2 * Math.PI);
-  var d = random(r, r2);
-  return [x + (Math.cos(angle) * d), y + (Math.sin(angle) * d)];
+var standardIsInside = function(x, y) {
+  return (x > minX && x < maxX && y > minY && y < maxY);
 }
 
 
-// Check if point is inside bounding box
 
-var inside = function(x, y) {
-  return (x > minX && x < maxX && y > minY && y < maxY);
+// Make an isInside function isInside function that
+// checks if point is inside bounding box
+
+var updateBoundingBox = function(options) {
+  // Origin of the bounding box
+  minX = (options.origin && options.origin[0]) || 0;
+  minY = (options.origin && options.origin[1]) || 0;
+  
+  // Width / height of bounding box
+  // Either directly via width/height, or opposite corner of rectangle
+  if(options.max) {
+    width = options.max[0] - minX;
+    height = options.max[1] - minY;
+  }
+  else {
+    width = options.width || (options.dimensions && options.dimensions[0]) || 100;
+    height = options.height || (options.dimensions && options.dimensions[1]) || 100;
+  }
+  
+  // Opposite corner
+  maxX = minX + width;
+  maxY = minY + height;
+  
+  // Padding
+  if(options.padding === true) {
+    // true: padding = r
+    minX += r;
+    minY += r;
+    maxX -= r;
+    maxY -= r;
+  }
+  else if(typeof options.padding === "number") {
+    // number: padding = this number
+    minX += options.padding;
+    minY += options.padding;
+    maxX -= options.padding;
+    maxY -= options.padding;
+  }
+  else if(options.padding) {
+    // Array: padding = individual values
+    minX += options.padding[0];
+    minY += options.padding[1];
+    maxX -= options.padding[2];
+    maxY -= options.padding[3];
+  }
 }
 
 
@@ -65,9 +102,21 @@ var getCell = function(x, y) {
 }
 
 
+
+// Generate a candidate
+// distance to point at (x, y) between 'r' and r*2
+// or: r < d < r * 2
+
+var genCandidate = function(x, y) {
+  var angle = random(0, 2 * Math.PI);
+  var d = random(r, r2);
+  return [x + (Math.cos(angle) * d), y + (Math.sin(angle) * d)];
+}
+
+
 // Check if a candidate is valid
 
-var checkCandidate = function(candidate) {
+var check = function(candidate) {
   // Indices in the grid for this candidate
   var x = Math.floor(candidate[0] / size);
   var y = Math.floor(candidate[1] / size);
@@ -105,26 +154,30 @@ var add = function(point) {
 
 
 
-var bridson = function(options) {
-  var a = 0;
+var bridson = function(candidates) {
+  var iterations = 0;
+  
   while(active.length) {
-    a++;
+    iterations++;
+    
     // Get a random active point
     var currentIndex = randInt(0, active.length - 1);
     var current = active[currentIndex];
     var generatedPoint = false;
     
     // Check 15 random candidates
-    for(var i = 0; i < 15; i++) {
+    for(var i = 0; i < candidates; i++) {
       // Generate a candidate
       var candidate = genCandidate(current[0], current[1]);
       
       // Check if candidate is valid:
       // - inside bounding box
       // - not inside a radius of 'r' of any other point
-      if(inside(candidate[0], candidate[1]) && checkCandidate(candidate)) {
+      if(isInside(candidate[0], candidate[1]) && check(candidate)) {
         add(candidate);
         generatedPoint = true;
+        
+        // Results in slightly more iterations, but slightly faster results
         break;
       }
     }
@@ -136,31 +189,14 @@ var bridson = function(options) {
     }
   }
   
-  console.log("Iterations:", a);
+  return iterations;
 }
 
 
 module.exports = function(options) {
   var options = options || {};
   
-  // Origin
-  minX = (options.origin && options.origin[0]) || 0;
-  minY = (options.origin && options.origin[1]) || 0;
-  
-  // Width / height of bounding box
-  // Either directly via width/height, or other corner of rectangle
-  if(options.max) {
-    width = options.max[0] - minX;
-    height = options.max[1] - minY;
-  }
-  else {
-    width = options.width || (options.dimensions && options.dimensions[0]) || 100;
-    height = options.height || (options.dimensions && options.dimensions[1]) || 100;
-  }
-  
-  // Some more vars
-  maxX = minX + width;
-  maxY = minY + height;
+  // Some vars
   r = options.r || 10;
   r2 = r * 2;
   size = r / Math.sqrt(2);
@@ -168,35 +204,50 @@ module.exports = function(options) {
   active = [];
   inactive = [];
   
-  // Padding
-  if(options.contain === true) {
-    // true: padding = r
-    minX += r;
-    minY += r;
-    maxX -= r;
-    maxY -= r;
+  
+  // Populate the isInside function
+  if(options.isInside) {
+    isInside = options.isInside;
   }
-  else if(typeof options.contain === "number") {
-    // number: padding = this number
-    minX += options.contain;
-    minY += options.contain;
-    maxX -= options.contain;
-    maxY -= options.contain;
-  }
-  else if(options.contain) {
-    // Array: padding = individual values
-    minX += options.contain[0];
-    minY += options.contain[1];
-    maxX -= options.contain[2];
-    maxY -= options.contain[3];
+  else {
+    updateBoundingBox(options);
+    isInside = standardIsInside;
   }
   
-  // Make a starting point
-  var start = [random(minX, maxX), random(minY, maxY)];
-  add(start);
+  
+  // Starting point
+  if(options.start && typeof options.start[0] === "object") {
+    // Start with an array of active points
+    for(var i = 0, len = options.start; i < len; i++) {
+      add(options.start[i]);
+    }
+  }
+  else if(options.start) {
+    // Use a given starting point
+    add(options.start);
+  }
+  else {
+    // Make a random starting point
+    var start = [random(minX, maxX), random(minY, maxY)];
+    add(start);
+  }
+  
+  
   
   // MAGIC!
-  bridson();
+  var iterations = bridson(options.candidates || 15);
+  
+  
+  
+  // Add the amount of iterations, if needed
+  if(options.iterations === true) {
+    // true: add as 'iterations'
+    inactive.iterations = iterations;
+  }
+  else if(options.iterations) {
+    // string: the name for the property is provided
+    inactive[options.iterations] = iterations;
+  }
   
   return inactive;
 }
@@ -249,10 +300,12 @@ button.addEventListener("click", function() {
     width: width,
     height: height,
     r: 30,
-    contain: 3
+    contain: 3,
+    iterations: true
   });
   var end = performance.now();
   console.log("Time:", (end-start) + "ms");
+  console.log("Iterations:", points.iterations);
 
   ctx.clearRect(0, 0, width, height);
   for(var i = 0, len = points.length; i < len; i++) {

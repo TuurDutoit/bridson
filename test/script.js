@@ -15,10 +15,12 @@ button.addEventListener("click", function() {
     width: width,
     height: height,
     r: 30,
-    contain: 3
+    contain: 3,
+    iterations: true
   });
   var end = performance.now();
   console.log("Time:", (end-start) + "ms");
+  console.log("Iterations:", points.iterations);
 
   ctx.clearRect(0, 0, width, height);
   for(var i = 0, len = points.length; i < len; i++) {
