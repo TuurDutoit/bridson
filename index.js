@@ -217,7 +217,7 @@ module.exports = function(options) {
   // Starting point
   if(options.start && typeof options.start[0] === "object") {
     // Start with an array of active points
-    for(var i = 0, len = options.start; i < len; i++) {
+    for(var i = 0, len = options.start.length; i < len; i++) {
       add(options.start[i]);
     }
   }

@@ -1,6 +1,6 @@
 {
   "name": "bridson",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A javascript implementation of the Bridson algorithm for generating Poisson-disc distributions",
   "main": "index.js",
   "dependencies": {
