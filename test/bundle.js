@@ -1,6 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var random = require("randf");
 var randInt = require("random-int");
+var Grid = require("space-grid");
+var grid = new Grid(0);
 
 // Some vars we'll need
 var minX;
@@ -10,7 +12,6 @@ var maxY;
 var r;
 var r2;
 var size;
-var grid;
 var active;
 var inactive;
 var isInside;
@@ -95,13 +96,6 @@ var dist = function(x1, y1, x2, y2) {
 }
 
 
-// Get the name of the cell for a point at (x, y)
-
-var getCell = function(x, y) {
-  return Math.floor(x / size) + "," + Math.floor(y / size);
-}
-
-
 
 // Generate a candidate
 // distance to point at (x, y) between 'r' and r*2
@@ -123,8 +117,7 @@ var check = function(candidate) {
   
   // Check surrounding cells for points that are too close (d < r)
   for(var i = 0, len = cellsToCheck.length; i < len; i++) {
-    var str = (x + cellsToCheck[i][0]) + "," + (y + cellsToCheck[i][1]);
-    var other = grid[str];
+    var other = grid.getI(x + cellsToCheck[i][0], y + cellsToCheck[i][1]);
     
     if(other) {
       var d = dist(candidate[0], candidate[1], other[0], other[1]);
@@ -143,8 +136,7 @@ var check = function(candidate) {
 
 var add = function(point) {
   active.push(point);
-  var str = getCell(point[0], point[1]);
-  grid[str] = point;
+  grid.add(point, point[0], point[1]);
 }
 
 
@@ -200,9 +192,9 @@ module.exports = function(options) {
   r = options.r || 10;
   r2 = r * 2;
   size = r / Math.sqrt(2);
-  grid = {};
   active = [];
   inactive = [];
+  grid.size(size);
   
   
   // Populate the isInside function
@@ -218,7 +210,7 @@ module.exports = function(options) {
   // Starting point
   if(options.start && typeof options.start[0] === "object") {
     // Start with an array of active points
-    for(var i = 0, len = options.start; i < len; i++) {
+    for(var i = 0, len = options.start.length; i < len; i++) {
       add(options.start[i]);
     }
   }
@@ -251,7 +243,7 @@ module.exports = function(options) {
   
   return inactive;
 }
-},{"randf":2,"random-int":3}],2:[function(require,module,exports){
+},{"randf":2,"random-int":3,"space-grid":4}],2:[function(require,module,exports){
 function random(start, end) {
     var n0 = typeof start === 'number',
         n1 = typeof end === 'number'
@@ -283,6 +275,86 @@ module.exports = function (min, max) {
 };
 
 },{}],4:[function(require,module,exports){
+var Grid = function(width, height) {
+  this.size(width, height);
+}
+
+Grid.prototype.reset = function() {
+  this.grid = {};
+
+  return this;
+}
+
+Grid.prototype.size = function(width, height) {
+  this.reset();
+  this.cellWidth = width;
+  this.cellHeight = height || width;
+
+  return this;
+}
+
+Grid.prototype.str = function(x, y) {
+  return Math.floor(x / this.cellWidth) + "," + Math.floor(y / this.cellHeight);
+}
+
+Grid.prototype.add = function(item, x, y) {
+  var str = this.str(x, y);
+  this.grid[str] = item;
+
+  return this;
+}
+
+Grid.prototype.addI = function(item, x, y) {
+  var str = x + "," + y;
+  this.grid[str] = item;
+
+  return this;
+}
+
+Grid.prototype.remove = function(x, y) {
+  var str = this.str(x, y);
+  this.grid[str] = undefined;
+
+  return this;
+}
+
+Grid.prototype.removeI = function(x, y) {
+  var str = x + "," + y;
+  this.grid[str] = undefined;
+
+  return this;
+}
+
+Grid.prototype.get = function(x, y) {
+  var str = this.str(x, y);
+  return this.grid[str];
+}
+
+Grid.prototype.getI = function(x, y) {
+  var str = x + "," + y;
+  return this.grid[str];
+}
+
+Grid.prototype.hasItem = function(x, y) {
+  return !!this.get(x, y);
+}
+
+Grid.prototype.hasItemI = function(x, y) {
+  return !!this.getI(x, y);
+}
+
+Grid.prototype.isEmpty = function(x, y) {
+  return !this.get(x, y);
+}
+
+Grid.prototype.isEmptyI = function(x, y) {
+  return !this.getI(x, y);
+}
+
+
+
+module.exports = Grid;
+},{}],5:[function(require,module,exports){
 var bridson = require("../");
 var button = document.querySelector("button");
 var canvas = document.querySelector("canvas");
@@ -315,4 +387,4 @@ button.addEventListener("click", function() {
     ctx.fill();
   }
 });
-},{"../":1}]},{},[4]);
+},{"../":1}]},{},[5]);

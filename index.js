@@ -1,5 +1,7 @@
 var random = require("randf");
 var randInt = require("random-int");
+var Grid = require("space-grid");
+var grid = new Grid(0);
 
 // Some vars we'll need
 var minX;
@@ -9,7 +11,6 @@ var maxY;
 var r;
 var r2;
 var size;
-var grid;
 var active;
 var inactive;
 var isInside;
@@ -94,13 +95,6 @@ var dist = function(x1, y1, x2, y2) {
 }
 
 
-// Get the name of the cell for a point at (x, y)
-
-var getCell = function(x, y) {
-  return Math.floor(x / size) + "," + Math.floor(y / size);
-}
-
-
 
 // Generate a candidate
 // distance to point at (x, y) between 'r' and r*2
@@ -122,8 +116,7 @@ var check = function(candidate) {
   
   // Check surrounding cells for points that are too close (d < r)
   for(var i = 0, len = cellsToCheck.length; i < len; i++) {
-    var str = (x + cellsToCheck[i][0]) + "," + (y + cellsToCheck[i][1]);
-    var other = grid[str];
+    var other = grid.getI(x + cellsToCheck[i][0], y + cellsToCheck[i][1]);
     
     if(other) {
       var d = dist(candidate[0], candidate[1], other[0], other[1]);
@@ -142,8 +135,7 @@ var check = function(candidate) {
 
 var add = function(point) {
   active.push(point);
-  var str = getCell(point[0], point[1]);
-  grid[str] = point;
+  grid.add(point, point[0], point[1]);
 }
 
 
@@ -199,9 +191,9 @@ module.exports = function(options) {
   r = options.r || 10;
   r2 = r * 2;
   size = r / Math.sqrt(2);
-  grid = {};
   active = [];
   inactive = [];
+  grid.size(size);
   
   
   // Populate the isInside function

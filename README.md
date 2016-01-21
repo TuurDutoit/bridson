@@ -1,6 +1,6 @@
 bridson
 =======
-v0.0.3
+v0.0.4
 
 
 A simple Bridson algorithm for generating Poisson-disc distributions
