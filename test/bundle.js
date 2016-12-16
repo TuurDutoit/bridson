@@ -103,7 +103,7 @@ var dist = function(x1, y1, x2, y2) {
 
 var genCandidate = function(x, y) {
   var angle = random(0, 2 * Math.PI);
-  var d = random(r, r2);
+  var d = r + Math.sqrt(Math.random()) * r;
   return [x + (Math.cos(angle) * d), y + (Math.sin(angle) * d)];
 }
 
@@ -281,7 +281,7 @@ var Grid = function(width, height) {
 
 Grid.prototype.reset = function() {
   this.grid = {};
-
+  
   return this;
 }
 
@@ -289,7 +289,7 @@ Grid.prototype.size = function(width, height) {
   this.reset();
   this.cellWidth = width;
   this.cellHeight = height || width;
-
+  
   return this;
 }
 
@@ -300,7 +300,7 @@ Grid.prototype.str = function(x, y) {
 Grid.prototype.add = function(item, x, y) {
   var str = this.str(x, y);
   this.grid[str] = item;
-
+  
   return this;
 }
 
@@ -314,7 +314,7 @@ Grid.prototype.addI = function(item, x, y) {
 Grid.prototype.remove = function(x, y) {
   var str = this.str(x, y);
   this.grid[str] = undefined;
-
+  
   return this;
 }
 

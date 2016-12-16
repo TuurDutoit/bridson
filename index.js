@@ -102,7 +102,7 @@ var dist = function(x1, y1, x2, y2) {
 
 var genCandidate = function(x, y) {
   var angle = random(0, 2 * Math.PI);
-  var d = random(r, r2);
+  var d = r + Math.sqrt(Math.random()) * r;
   return [x + (Math.cos(angle) * d), y + (Math.sin(angle) * d)];
 }
 
