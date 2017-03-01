@@ -6,7 +6,7 @@ v0.0.4
 A simple Bridson algorithm for generating Poisson-disc distributions
 This is a very simple, rushed implementation; I'm sure it could be lot more performant and concise. Nevertheless, have fun!
 
-For more detailed info about the algorithm, check [Donald Norman's article 'Visualizing Algorithms'](http://bost.ocks.org/mike/algorithms/#sampling).
+For more detailed info about the algorithm, check [Mike Bostock's article 'Visualizing Algorithms'](http://bost.ocks.org/mike/algorithms/#sampling).
 
 
 ## API
